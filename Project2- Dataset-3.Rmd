@@ -19,7 +19,7 @@ library(RMySQL)
 ```{r}
 # Read the csv file from GitHub with the table data
 # Rename the columns to make them easier to use
-df3 <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/DataUSACart.csv", header = TRUE) %>%
+df_csv <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/DataUSACart.csv", header = TRUE) %>%
   as_tibble() %>%
   rename(id = ID.Geography , 
          agencyid= ID.Agency ,
@@ -29,11 +29,11 @@ df3 <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/D
 ```
 
 #### Creating AWS MySQL Connection & Reading Data from MySQL
-```{r}
+```{r,warning=FALSE}
 mysqlconnection = dbConnect(MySQL(), user='root', password='xxxx', dbname ='federal_spending',host='aws-movie-rating.cc7r4c0owv8u.us-east-1.rds.amazonaws.com')
 result = dbSendQuery(mysqlconnection,"SELECT `ID Geography` AS id,`Geography`,`ID Agency`AS agencyid ,`Agency`,`Obligation Amount (2017)` AS amount FROM federal_spending.fedspend")
-df=fetch(result)
-(df)
+df=fetch(result,n= -1)
+head(df)
 ```
 
 
@@ -42,8 +42,8 @@ df=fetch(result)
 ```{r}
 # Remove amounts that are in -ve
 df1 <- df %>%
-  filter(amount > 0) %>%
-  print()
+  filter(amount > 0)
+head(df1)
 # 6158 obs and 5 vars
 ```
 
@@ -54,22 +54,27 @@ df2 <- df1 %>%
 summary(df2)
 ```
 
-#### Calculate the overall avg spending by State 
+#### Calculate the overall spending by State 
 
-```{r}
+```{r,warning=FALSE}
 state_spending <- df2 %>% group_by(Geography) %>% summarize(sum_state = sum(amount)) %>%
   arrange(sum_state, Geography)
-head(state_spending)
-# Wyoming has the highest Federal Spending at $14,977,226
+tail(state_spending)
+# Wyoming has the highest Federal Spending at $186,831,546,017
 ```
 
-#### Calculate the overall avg spending by Agency 
+#### Calculate the overall spending by Agency 
 
-```{r}
+```{r,warning=FALSE}
 agency_spending <- df2 %>% group_by(Agency) %>% summarize(sum_agency = sum(amount)) %>%
-  arrange(sum_agency, Agency)
+  arrange(desc(sum_agency, Agency))
 head(agency_spending)
-# Office of the Under Secretary of the Interior at $20,000 is the highest spending agency
+# Centers for Medicare and Medicaid Services at $687,665,667,131 is the highest spending agency
 ```
 
 #### Plotting 5 highest spending states
+
+
+
+
+
