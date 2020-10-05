@@ -10,15 +10,16 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(RMySQL)
 ```
 
 
-## Import and Rename Variables in Federal Spending Data
+#### Import and Rename Variables in Federal Spending Data
 
 ```{r}
 # Read the csv file from GitHub with the table data
 # Rename the columns to make them easier to use
-df <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/DataUSACart.csv", header = TRUE) %>%
+df3 <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/DataUSACart.csv", header = TRUE) %>%
   as_tibble() %>%
   rename(id = ID.Geography , 
          agencyid= ID.Agency ,
@@ -27,7 +28,16 @@ df <- read.csv("https://raw.githubusercontent.com/Araisedtotwo/Project02/main/Da
 # 6557 obs and 5 vars
 ```
 
-## Clean data
+#### Creating AWS MySQL Connection & Reading Data from MySQL
+```{r}
+mysqlconnection = dbConnect(MySQL(), user='root', password='xxxx', dbname ='federal_spending',host='aws-movie-rating.cc7r4c0owv8u.us-east-1.rds.amazonaws.com')
+result = dbSendQuery(mysqlconnection,"SELECT `ID Geography` AS id,`Geography`,`ID Agency`AS agencyid ,`Agency`,`Obligation Amount (2017)` AS amount FROM federal_spending.fedspend")
+df=fetch(result)
+(df)
+```
+
+
+#### Clean data
 
 ```{r}
 # Remove amounts that are in -ve
@@ -37,14 +47,14 @@ df1 <- df %>%
 # 6158 obs and 5 vars
 ```
 
-## Let us sort data by spending amount and look at the summary of all variables
+#### Let us sort data by spending amount and look at the summary of all variables
 ```{r}
 df2 <- df1 %>%
   arrange(amount)
 summary(df2)
 ```
 
-## Calculate the overall avg spending by State 
+#### Calculate the overall avg spending by State 
 
 ```{r}
 state_spending <- df2 %>% group_by(Geography) %>% summarize(sum_state = sum(amount)) %>%
@@ -53,7 +63,7 @@ head(state_spending)
 # Wyoming has the highest Federal Spending at $14,977,226
 ```
 
-## Calculate the overall avg spending by Agency 
+#### Calculate the overall avg spending by Agency 
 
 ```{r}
 agency_spending <- df2 %>% group_by(Agency) %>% summarize(sum_agency = sum(amount)) %>%
@@ -62,4 +72,4 @@ head(agency_spending)
 # Office of the Under Secretary of the Interior at $20,000 is the highest spending agency
 ```
 
-## Plotting 5 highest spending states
+#### Plotting 5 highest spending states
