@@ -58,10 +58,25 @@ summary(df2)
 
 ```{r,warning=FALSE}
 state_spending <- df2 %>% group_by(Geography) %>% summarize(sum_state = sum(amount)) %>%
-  arrange(sum_state, Geography)
-tail(state_spending)
-# Wyoming has the highest Federal Spending at $186,831,546,017
+  arrange(desc(sum_state, Geography))
+head(state_spending)
+# California has the highest Federal Spending at $186,831,546,017
+
 ```
+
+#### Plotting 5 highest spending states
+```{r}
+df7 <- state_spending %>% top_n(5) 
+
+plot1 <- ggplot(df7, aes(Geography,sum_state )) + 
+  geom_bar(aes(fill = Geography), position = "dodge", stat = "identity") + 
+  geom_text(aes(label = sum_state), vjust = -.3) +
+  ylab("Amount Spent") +
+  ggtitle("5 highest spending states")
+
+plot1
+```
+
 
 #### Calculate the overall spending by Agency 
 
@@ -72,9 +87,17 @@ head(agency_spending)
 # Centers for Medicare and Medicaid Services at $687,665,667,131 is the highest spending agency
 ```
 
-#### Plotting 5 highest spending states
+#### Plotting 5 lowest spending agencies
+```{r}
+df8 <- agency_spending %>% top_n(-5) 
 
+plot2 <- ggplot(df8, aes(Agency,sum_agency/1000 )) + 
+  geom_bar(aes(fill = Agency), position = "dodge", stat = "identity") + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())  +
+  geom_text(aes(label = sum_agency*1000), vjust = -.3) +
+  ylab("Amount Spent") +
+  ggtitle("5 lowest spending agencies")
 
-
-
-
+plot2
+```
